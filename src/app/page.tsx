@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-pink-100 to-purple-200 p-8">
+    <main className="min-h-screen bg-gradient-to-b from-pink-100 to-purple-200 p-8 pt-16">
       <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-2xl font-bold mb-4">Message 1</h2>

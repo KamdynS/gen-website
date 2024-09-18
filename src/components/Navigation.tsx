@@ -9,7 +9,7 @@ export function Navigation() {
   return (
     <nav className="flex justify-between items-center py-4">
       <Link href="/" className="text-xl font-semibold text-purple-600 hover:text-purple-800 transition-colors">
-        A Tribute to my Genevieve
+        For My Funny Valentine
       </Link>
       <div className="space-x-4">
         <NavLink href="/" active={pathname === "/"}>Home</NavLink>

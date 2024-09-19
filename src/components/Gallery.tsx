@@ -1,23 +1,40 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 
 const TOTAL_IMAGES = 432;
 const GRID_SIZE = 4;
 const MAX_ACTIVE_IMAGES = 9;
-const IMAGE_DISPLAY_TIME = 15000; // 15 seconds
+const IMAGE_DISPLAY_TIME = 7500; // 7.5 seconds
 const FADE_DURATION = 500; // 0.5 seconds for fade in/out
+const MAX_RETRIES = 3; // Maximum number of retries for loading an image
 
 interface ImageItem {
   id: string;
   src: string;
   cellIndex: number;
-  startTime: number;
 }
 
-function GalleryCell({ image, onRemove }: { image: ImageItem, onRemove: () => void }) {
+const GalleryCell: React.FC<{ image: ImageItem; onRemove: () => void }> = ({ image, onRemove }) => {
   const [opacity, setOpacity] = useState(0);
+  const [imageSrc, setImageSrc] = useState(image.src);
+  const [retryCount, setRetryCount] = useState(0);
+
+  const getRandomImageSrc = useCallback(() => {
+    const randomNumber = Math.floor(Math.random() * TOTAL_IMAGES) + 1;
+    return `/images/image${randomNumber}.jpg`;
+  }, []);
+
+  const handleImageError = useCallback(() => {
+    if (retryCount < MAX_RETRIES) {
+      setImageSrc(getRandomImageSrc());
+      setRetryCount(prev => prev + 1);
+    } else {
+      console.error(`Failed to load image after ${MAX_RETRIES} attempts`);
+      onRemove();
+    }
+  }, [retryCount, getRandomImageSrc, onRemove]);
 
   useEffect(() => {
     const fadeInTimer = setTimeout(() => setOpacity(1), 50);
@@ -30,30 +47,29 @@ function GalleryCell({ image, onRemove }: { image: ImageItem, onRemove: () => vo
       clearTimeout(fadeInTimer);
       clearTimeout(removeTimer);
     };
-  }, [image.id, onRemove]);
+  }, [onRemove]);
 
   return (
     <div
       className="absolute inset-0 flex items-center justify-center"
       style={{
-        opacity: opacity,
+        opacity,
         transition: `opacity ${FADE_DURATION}ms ease-in-out`,
       }}
     >
       <Image
-        src={image.src}
+        src={imageSrc}
         alt="Gallery image"
         fill
         sizes="100vw"
-        style={{
-          objectFit: 'contain',
-        }}
+        style={{ objectFit: 'contain' }}
+        onError={handleImageError}
       />
     </div>
   );
-}
+};
 
-export default function Gallery() {
+const DynamicImageGallery: React.FC = () => {
   const [images, setImages] = useState<ImageItem[]>([]);
 
   const getRandomImageSrc = useCallback(() => {
@@ -73,8 +89,7 @@ export default function Gallery() {
     const newImage: ImageItem = {
       id: Date.now().toString(),
       src: getRandomImageSrc(),
-      cellIndex: cellIndex,
-      startTime: Date.now(),
+      cellIndex,
     };
 
     setImages(prev => [...prev, newImage]);
@@ -89,32 +104,25 @@ export default function Gallery() {
       if (images.length < MAX_ACTIVE_IMAGES) {
         addImage();
       }
-    }, 1000);
+    }, 1000); // Try to add a new image every second
 
     return () => clearInterval(interval);
   }, [addImage, images.length]);
 
-  const cellImages = useMemo(() => {
-    const cells: (ImageItem | null)[] = Array(GRID_SIZE * GRID_SIZE).fill(null);
-    images.forEach(img => {
-      cells[img.cellIndex] = img;
-    });
-    return cells;
-  }, [images]);
-
   return (
     <div className="w-full h-full grid grid-cols-4 grid-rows-4 gap-4">
-      {cellImages.map((image, index) => (
+      {Array.from({ length: GRID_SIZE * GRID_SIZE }).map((_, index) => (
         <div key={index} className="relative">
-          {image && (
+          {images.find(img => img.cellIndex === index) && (
             <GalleryCell
-              key={image.id}
-              image={image}
-              onRemove={() => removeImage(image.id)}
+              image={images.find(img => img.cellIndex === index)!}
+              onRemove={() => removeImage(images.find(img => img.cellIndex === index)!.id)}
             />
           )}
         </div>
       ))}
     </div>
   );
-}
+};
+
+export default DynamicImageGallery;

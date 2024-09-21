@@ -6,7 +6,7 @@ import Image from 'next/image';
 const TOTAL_IMAGES = 470;
 const GRID_SIZE = 4;
 const MAX_ACTIVE_IMAGES = 9;
-const IMAGE_DISPLAY_TIME = 7500; // 7.5 seconds
+const IMAGE_DISPLAY_TIME = 10000; // 7.5 seconds
 const FADE_DURATION = 500; // 0.5 seconds for fade in/out
 const MAX_RETRIES = 3; // Maximum number of retries for loading an image
 

@@ -16,7 +16,43 @@ interface ImageItem {
   cellIndex: number;
 }
 
-const GalleryCell: React.FC<{ image: ImageItem; onRemove: () => void }> = ({ image, onRemove }) => {
+// New component for full-screen view
+const FullScreenImage: React.FC<{ src: string; onClose: () => void }> = ({ src, onClose }) => {
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  return (
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75"
+      onClick={handleOverlayClick}
+    >
+      <div className="relative w-full h-full flex items-center justify-center">
+        <Image
+          src={src}
+          alt="Full-screen gallery image"
+          fill
+          sizes="100vw"
+          style={{ objectFit: 'contain' }}
+        />
+      </div>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onClose();
+        }}
+        className="absolute top-4 right-4 z-60 text-white text-4xl bg-black bg-opacity-50 rounded-full w-10 h-10 flex items-center justify-center"
+        aria-label="Close full-screen view"
+      >
+        &times;
+      </button>
+    </div>
+  );
+};
+
+const GalleryCell: React.FC<{ image: ImageItem; onRemove: () => void; onImageClick: (src: string) => void }> = ({ image, onRemove, onImageClick }) => {
   const [opacity, setOpacity] = useState(0);
   const [imageSrc, setImageSrc] = useState(image.src);
   const [retryCount, setRetryCount] = useState(0);
@@ -51,11 +87,12 @@ const GalleryCell: React.FC<{ image: ImageItem; onRemove: () => void }> = ({ ima
 
   return (
     <div
-      className="absolute inset-0 flex items-center justify-center"
+      className="absolute inset-0 flex items-center justify-center cursor-pointer"
       style={{
         opacity,
         transition: `opacity ${FADE_DURATION}ms ease-in-out`,
       }}
+      onClick={() => onImageClick(imageSrc)}
     >
       <Image
         src={imageSrc}
@@ -71,6 +108,8 @@ const GalleryCell: React.FC<{ image: ImageItem; onRemove: () => void }> = ({ ima
 
 const DynamicImageGallery: React.FC = () => {
   const [images, setImages] = useState<ImageItem[]>([]);
+  const [fullScreenSrc, setFullScreenSrc] = useState<string | null>(null);
+  const [isTimerPaused, setIsTimerPaused] = useState(false);
 
   const getRandomImageSrc = useCallback(() => {
     const randomNumber = Math.floor(Math.random() * TOTAL_IMAGES) + 1;
@@ -99,29 +138,50 @@ const DynamicImageGallery: React.FC = () => {
     setImages(prev => prev.filter(img => img.id !== id));
   }, []);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (images.length < MAX_ACTIVE_IMAGES) {
-        addImage();
-      }
-    }, 1000); // Try to add a new image every second
+  const handleImageClick = useCallback((src: string) => {
+    setFullScreenSrc(src);
+    setIsTimerPaused(true);
+  }, []);
 
-    return () => clearInterval(interval);
-  }, [addImage, images.length]);
+  const handleCloseFullScreen = useCallback(() => {
+    setFullScreenSrc(null);
+    setIsTimerPaused(false);
+  }, []);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (!isTimerPaused) {
+      interval = setInterval(() => {
+        if (images.length < MAX_ACTIVE_IMAGES) {
+          addImage();
+        }
+      }, 1000); // Try to add a new image every second
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [addImage, images.length, isTimerPaused]);
 
   return (
-    <div className="w-full h-full grid grid-cols-4 grid-rows-4 gap-4">
-      {Array.from({ length: GRID_SIZE * GRID_SIZE }).map((_, index) => (
-        <div key={index} className="relative">
-          {images.find(img => img.cellIndex === index) && (
-            <GalleryCell
-              image={images.find(img => img.cellIndex === index)!}
-              onRemove={() => removeImage(images.find(img => img.cellIndex === index)!.id)}
-            />
-          )}
-        </div>
-      ))}
-    </div>
+    <>
+      <div className="w-full h-full grid grid-cols-4 grid-rows-4 gap-4">
+        {Array.from({ length: GRID_SIZE * GRID_SIZE }).map((_, index) => (
+          <div key={index} className="relative">
+            {images.find(img => img.cellIndex === index) && (
+              <GalleryCell
+                image={images.find(img => img.cellIndex === index)!}
+                onRemove={() => removeImage(images.find(img => img.cellIndex === index)!.id)}
+                onImageClick={handleImageClick}
+              />
+            )}
+          </div>
+        ))}
+      </div>
+      {fullScreenSrc && (
+        <FullScreenImage src={fullScreenSrc} onClose={handleCloseFullScreen} />
+      )}
+    </>
   );
 };
 

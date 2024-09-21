@@ -2,14 +2,13 @@
 
 import Image from "next/image";
 import { useState, useEffect } from 'react';
-import SpotifyPlayer from '@/components/SpotifyPlayer';
 
 export default function Home() {
   const [timeTogether, setTimeTogether] = useState('');
 
   useEffect(() => {
     const calculateTimeTogether = () => {
-      const startDate = new Date('2023-02-25T22:00:00Z'); // 5pm EST is 22:00 UTC
+      const startDate = new Date('2023-02-25T21:00:00Z'); // 5pm EST is 22:00 UTC
       const now = new Date();
       const diff = now.getTime() - startDate.getTime();
 
@@ -87,15 +86,6 @@ export default function Home() {
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-2xl font-bold mb-4 text-purple-600">I love you Genevieve.</h2>
           <p className="text-gray-700">Come back to this website anytime you&apos;re missing me ❤️ I know I will. xoxo</p>
-        </div>
-      </div>
-      <div className="fixed bottom-4 left-4 z-10">
-        <div className="relative">
-          <p className="text-pink-500 text-sm mb-2 ml-4">
-            Click play to hear my playlist for Gen
-            <span className="inline-block ml-2 transform rotate-90">→</span>
-          </p>
-          <SpotifyPlayer />
         </div>
       </div>
     </main>

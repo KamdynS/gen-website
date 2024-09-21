@@ -73,16 +73,17 @@ const GalleryCell: React.FC<{ image: ImageItem; onRemove: () => void; onImageCli
   }, [retryCount, getRandomImageSrc, onRemove]);
 
   useEffect(() => {
-    const fadeInTimer = setTimeout(() => setOpacity(1), 50);
-    const removeTimer = setTimeout(() => {
-      setOpacity(0);
-      setTimeout(onRemove, FADE_DURATION);
-    }, IMAGE_DISPLAY_TIME - FADE_DURATION);
-
-    return () => {
-      clearTimeout(fadeInTimer);
-      clearTimeout(removeTimer);
-    };
+    if (typeof window !== 'undefined') {
+      const fadeInTimer = setTimeout(() => setOpacity(1), 50);
+      const removeTimer = setTimeout(() => {
+        setOpacity(0);
+        setTimeout(onRemove, FADE_DURATION);
+      }, IMAGE_DISPLAY_TIME - FADE_DURATION);
+      return () => {
+        clearTimeout(fadeInTimer);
+        clearTimeout(removeTimer);
+      };
+    }
   }, [onRemove]);
 
   return (

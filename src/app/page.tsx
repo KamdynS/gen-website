@@ -53,7 +53,7 @@ export default function Home() {
 
         <div className="relative h-64 rounded-lg overflow-hidden shadow-md">
           <Image
-            src="/images/image4.jpg"  // Change to .jpg if using JPG
+            src="/images/image78.jpg"  // Change to .jpg if using JPG
             alt="Easter Vigil"
             fill
             style={{ objectFit: 'cover' }}
@@ -62,7 +62,7 @@ export default function Home() {
 
         <div className="relative h-64 rounded-lg overflow-hidden shadow-md">
           <Image
-            src="/images/image63.jpg"  // Change to .jpg if using JPG
+            src="/images/image70.jpg"  // Change to .jpg if using JPG
             alt="Christmas in Boston"
             fill
             style={{ objectFit: 'cover' }}
@@ -76,7 +76,7 @@ export default function Home() {
 
         <div className="relative h-64 rounded-lg overflow-hidden shadow-md">
           <Image
-            src="/images/image381.jpg"  // Change to .jpg if using JPG
+            src="/images/image130.jpg"  // Change to .jpg if using JPG
             alt="At the Theater"
             fill
             style={{ objectFit: 'cover' }}

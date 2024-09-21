@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 
-const TOTAL_IMAGES = 432;
+const TOTAL_IMAGES = 470;
 const GRID_SIZE = 4;
 const MAX_ACTIVE_IMAGES = 9;
 const IMAGE_DISPLAY_TIME = 7500; // 7.5 seconds
